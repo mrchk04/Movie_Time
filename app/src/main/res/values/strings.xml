@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Movie Time</string>
+    <string name="intro1">Discover your</string>
+    <string name="intro2">Favorite movies</string>
+    <string name="intro3">You can explore movies, mark watched ones, and choose your favorites.</string>
+    <string name="get_started">Get Started</string>
 </resources>
