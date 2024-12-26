@@ -4,4 +4,11 @@
     <string name="intro2">Favorite movies</string>
     <string name="intro3">You can explore movies, mark watched ones, and choose your favorites.</string>
     <string name="get_started">Get Started</string>
+    <string name="search_movie">Search movie...</string>
+    <string name="best_movies">Best Movies</string>
+    <string name="category">Category</string>
+    <string name="uncoming_movies">Uncoming Movies</string>
+    <string name="explorer">Explorer</string>
+    <string name="favorite">Favorite</string>
+    <string name="profile">Profile</string>
 </resources>
