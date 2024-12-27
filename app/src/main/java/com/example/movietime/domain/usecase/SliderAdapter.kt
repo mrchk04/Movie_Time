@@ -2,6 +2,7 @@ package com.example.movietime.domain.usecase
 
 import android.R
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.movietime.databinding.ActivityMainBinding
 import com.example.movietime.databinding.SlideItemContainerBinding
 import com.example.movietime.domain.model.SliderItem
+import com.example.movietime.ui.detail.DetailActivity
 
 class SliderAdapter(private val sliderItems: MutableList<SliderItem>,
                     private val viewpager2: ViewPager2):
@@ -50,6 +52,14 @@ class SliderAdapter(private val sliderItems: MutableList<SliderItem>,
                 .load(sliderItem.image) // Використання властивості замість getImage()
                 .apply(requestOptions)
                 .into(imageView) // Використання imageView напряму
+
+            imageView.setOnClickListener {
+                val context = itemView.context
+                val intent = Intent(context, DetailActivity::class.java).apply {
+                    putExtra("MOVIE_ID", sliderItem.movieId) // Передаємо ID фільму
+                }
+                context.startActivity(intent)
+            }
         }
     }
 

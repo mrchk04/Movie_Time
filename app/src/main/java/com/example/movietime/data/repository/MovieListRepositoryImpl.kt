@@ -1,6 +1,8 @@
 package com.example.movietime.data.repository
 
 import android.net.http.HttpException
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import com.example.movietime.data.Resource
 import com.example.movietime.data.local.movie.MovieDB
 import com.example.movietime.data.remote.api.MovieAPI
@@ -17,6 +19,7 @@ class MovieListRepositoryImpl @Inject constructor(
     private val db: MovieDB
 ) : MovieListRepository {
 
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override suspend fun getMovieList(
         forceFetchFromRemote: Boolean,
         category: String,

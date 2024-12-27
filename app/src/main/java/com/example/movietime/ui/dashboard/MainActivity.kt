@@ -22,10 +22,12 @@ import com.android.volley.toolbox.Volley
 import com.example.movietime.databinding.ActivityMainBinding
 import com.example.movietime.domain.model.SliderItem
 import com.example.movietime.domain.usecase.SliderAdapter
-import com.example.movietime.R
 import com.example.movietime.data.remote.api.MovieAPI.Companion.API_KEY
 import com.example.movietime.data.remote.api.MovieAPI.Companion.BASE_URL
+import com.example.movietime.data.remote.dto.GenreListDto
 import com.example.movietime.data.remote.dto.MovieListDto
+import com.example.movietime.data.remote.dto.PopularMoviesResponse
+import com.example.movietime.domain.usecase.CategoryListAdapter
 import com.example.movietime.domain.usecase.FilmListAdapter
 import com.google.gson.Gson
 import kotlin.math.abs
@@ -71,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         banners()
         sendRequestPopular()
         sendRequestUpcoming()
+        sendRequestCategory()
     }
 
     private fun sendRequestPopular() {
@@ -88,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             recyclerViewBestMovies.adapter = adapterBestMovies
         }, { error ->
             loading1.visibility = View.GONE
-            //Log.i("UiLover", "onErrorResponse: ${error.toString()}")
+            Log.i("MT", "onErrorResponse: ${error.toString()}")
         })
 
         mRequestQueue.add(mStringRequest)
@@ -109,22 +112,68 @@ class MainActivity : AppCompatActivity() {
             recyclerViewUpcoming.adapter = adapterUpcoming
         }, { error ->
             loading3.visibility = View.GONE
-            //Log.i("UiLover", "onErrorResponse: ${error.toString()}")
+            Log.i("MT", "onErrorResponse: ${error.toString()}")
         })
 
         mRequestQueue.add(mStringRequest3)
     }
 
+    private fun sendRequestCategory() {
+        // Використовуємо вже ініціалізований mRequestQueue
+        mRequestQueue = Volley.newRequestQueue(this)
+        loading2.visibility = View.VISIBLE
+
+        val url = "${BASE_URL}genre/movie/list?api_key=${API_KEY}&language=en-US&page=1"
+
+        val mStringRequest2 = StringRequest(Request.Method.GET, url, { response ->
+            val gson = Gson()
+            val items = gson.fromJson(response, GenreListDto::class.java)
+            loading2.visibility = View.GONE
+            adapterCategory = CategoryListAdapter(items.genres)
+            recyclerViewCategory.adapter = adapterCategory
+        }, { error ->
+            loading3.visibility = View.GONE
+            Log.i("MT", "onErrorResponse: ${error.toString()}")
+        })
+
+        mRequestQueue.add(mStringRequest2)
+    }
+
 
 
     private fun banners() {
-        val sliderItems = mutableListOf(
-            SliderItem(R.drawable.wide),
-            SliderItem(R.drawable.wide1),
-            SliderItem(R.drawable.wide3)
-        )
+        val url = "${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1"
 
-        viewPager2.adapter = SliderAdapter(sliderItems, viewPager2)
+        val requestQueue = Volley.newRequestQueue(this)
+
+        val stringRequest = StringRequest(Request.Method.GET, url, { response ->
+            try {
+                val gson = Gson()
+                val popularMovies = gson.fromJson(response, PopularMoviesResponse::class.java)
+
+                // Отримуємо перші 5 фільмів із списку
+                val topMovies = popularMovies.results.take(5)
+
+                // Формуємо список постерів для адаптера
+                val sliderItems = topMovies.mapNotNull { movie ->
+                    movie.backdropPath?.let { backdropPath ->
+                        SliderItem("https://image.tmdb.org/t/p/w780${backdropPath}", movie.id)
+                    }
+                }
+
+                setupViewPager(sliderItems)
+
+            } catch (e: Exception) {
+                Log.e("MT", "JSON Parsing Error: ${e.localizedMessage}")
+            }
+        }, { error ->
+            Log.e("MT", "onErrorResponse: ${error.localizedMessage}")
+        })
+
+        requestQueue.add(stringRequest)
+    }
+    private fun setupViewPager(sliderItems: List<SliderItem>) {
+        viewPager2.adapter = SliderAdapter(sliderItems as MutableList<SliderItem>, viewPager2)
         viewPager2.clipToPadding = false
         viewPager2.clipChildren = false
         viewPager2.offscreenPageLimit = 3
@@ -170,9 +219,9 @@ class MainActivity : AppCompatActivity() {
         viewPager2 = view.viewPager
         recyclerViewBestMovies = view.view1
         recyclerViewBestMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerViewUpcoming = view.view2
+        recyclerViewUpcoming = view.view3
         recyclerViewUpcoming.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerViewCategory = view.view3
+        recyclerViewCategory = view.view2
         recyclerViewCategory.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         loading1 = view.progressBar1
         loading2 = view.progressBar2
