@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.androidx.room.ktx)
     implementation (libs.hilt.android)
+    debugImplementation(libs.leakcanary.android)
     kapt (libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -24,7 +24,9 @@ import com.example.movietime.domain.model.SliderItem
 import com.example.movietime.domain.usecase.SliderAdapter
 import com.example.movietime.data.remote.api.MovieAPI.Companion.API_KEY
 import com.example.movietime.data.remote.api.MovieAPI.Companion.BASE_URL
+import com.example.movietime.data.remote.dto.GenreDto
 import com.example.movietime.data.remote.dto.GenreListDto
+import com.example.movietime.data.remote.dto.MovieDto
 import com.example.movietime.data.remote.dto.MovieListDto
 import com.example.movietime.data.remote.dto.PopularMoviesResponse
 import com.example.movietime.domain.usecase.CategoryListAdapter
@@ -39,18 +41,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewPager2: ViewPager2
     private val slideHandler: Handler = Handler(Looper.getMainLooper())
 
-    private lateinit var adapterBestMovies: RecyclerView.Adapter<*>
-    private lateinit var adapterUpcoming: RecyclerView.Adapter<*>
-    private lateinit var adapterCategory: RecyclerView.Adapter<*>
-
     private lateinit var recyclerViewBestMovies: RecyclerView
     private lateinit var recyclerViewUpcoming: RecyclerView
     private lateinit var recyclerViewCategory: RecyclerView
 
     private lateinit var mRequestQueue: RequestQueue
-    private lateinit var mRequest: StringRequest
-    private lateinit var mRequest2: StringRequest
-    private lateinit var mRequest3: StringRequest
 
     private lateinit var loading1: ProgressBar
     private lateinit var loading2: ProgressBar
@@ -69,74 +64,56 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        mRequestQueue = Volley.newRequestQueue(this)
+
         initView()
         banners()
-        sendRequestPopular()
-        sendRequestUpcoming()
-        sendRequestCategory()
+        fetchData<MovieDto, MovieListDto>(
+            "${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1",
+            loading1,
+            recyclerViewBestMovies,
+            listExtractor = { it.results }  // Витягуємо список фільмів
+        ) { movies -> FilmListAdapter(movies) }  // Передаємо адаптер
+
+        fetchData<MovieDto, MovieListDto>(
+            "${BASE_URL}movie/upcoming?api_key=${API_KEY}&language=en-US&page=1",
+            loading3,
+            recyclerViewUpcoming,
+            listExtractor = { it.results }  // Витягуємо список фільмів
+        ) { movies -> FilmListAdapter(movies) }  // Передаємо адаптер
+
+        fetchData<GenreDto, GenreListDto>(
+            "${BASE_URL}genre/movie/list?api_key=${API_KEY}&language=en-US",
+            loading2,
+            recyclerViewCategory,
+            listExtractor = { it.genres }  // Витягуємо список жанрів
+        ) { genres -> CategoryListAdapter(genres) }  // Передаємо адаптер
     }
 
-    private fun sendRequestPopular() {
-        // Використовуємо вже ініціалізований mRequestQueue
-        mRequestQueue = Volley.newRequestQueue(this)
-        loading1.visibility = View.VISIBLE
 
-        val url = "${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1"
+    private inline fun <reified T, reified R> fetchData(
+        url: String,
+        loadingIndicator: ProgressBar,
+        recyclerView: RecyclerView,
+        crossinline listExtractor: (R) -> List<T>,
+        crossinline adapterSetter: (List<T>) -> RecyclerView.Adapter<*>
+    ) {
+        loadingIndicator.visibility = View.VISIBLE
 
-        val mStringRequest = StringRequest(Request.Method.GET, url, { response ->
-            val gson = Gson()
-            loading1.visibility = View.GONE
-            val items = gson.fromJson(response, MovieListDto::class.java)
-            adapterBestMovies = FilmListAdapter(items.results)
-            recyclerViewBestMovies.adapter = adapterBestMovies
+        val request = StringRequest(Request.Method.GET, url, { response ->
+            loadingIndicator.visibility = View.GONE
+
+            val items = Gson().fromJson(response, R::class.java)
+            val list = listExtractor(items)
+
+            recyclerView.adapter = adapterSetter(list)
+
         }, { error ->
-            loading1.visibility = View.GONE
-            Log.i("MT", "onErrorResponse: ${error.toString()}")
+            loadingIndicator.visibility = View.GONE
+            Log.i("MT", "onErrorResponse: ${error}")
         })
 
-        mRequestQueue.add(mStringRequest)
-    }
-
-    private fun sendRequestUpcoming() {
-        // Використовуємо вже ініціалізований mRequestQueue
-        mRequestQueue = Volley.newRequestQueue(this)
-        loading3.visibility = View.VISIBLE
-
-        val url = "${BASE_URL}movie/upcoming?api_key=${API_KEY}&language=en-US&page=1"
-
-        val mStringRequest3 = StringRequest(Request.Method.GET, url, { response ->
-            val gson = Gson()
-            loading3.visibility = View.GONE
-            val items = gson.fromJson(response, MovieListDto::class.java)
-            adapterUpcoming = FilmListAdapter(items.results)
-            recyclerViewUpcoming.adapter = adapterUpcoming
-        }, { error ->
-            loading3.visibility = View.GONE
-            Log.i("MT", "onErrorResponse: ${error.toString()}")
-        })
-
-        mRequestQueue.add(mStringRequest3)
-    }
-
-    private fun sendRequestCategory() {
-        // Використовуємо вже ініціалізований mRequestQueue
-        mRequestQueue = Volley.newRequestQueue(this)
-        loading2.visibility = View.VISIBLE
-
-        val url = "${BASE_URL}genre/movie/list?api_key=${API_KEY}&language=en-US&page=1"
-
-        val mStringRequest2 = StringRequest(Request.Method.GET, url, { response ->
-            val gson = Gson()
-            val items = gson.fromJson(response, GenreListDto::class.java)
-            loading2.visibility = View.GONE
-            adapterCategory = CategoryListAdapter(items.genres)
-            recyclerViewCategory.adapter = adapterCategory
-        }, { error ->
-            loading3.visibility = View.GONE
-            Log.i("MT", "onErrorResponse: ${error.toString()}")
-        })
-
-        mRequestQueue.add(mStringRequest2)
+        mRequestQueue.add(request)
     }
 
 
@@ -156,7 +133,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Формуємо список постерів для адаптера
                 val sliderItems = topMovies.mapNotNull { movie ->
-                    movie.backdropPath?.let { backdropPath ->
+                    movie.backdropPath.let { backdropPath ->
                         SliderItem("https://image.tmdb.org/t/p/w780${backdropPath}", movie.id)
                     }
                 }
