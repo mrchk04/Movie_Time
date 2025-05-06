@@ -35,7 +35,9 @@
                 android:inputType="text"
                 android:padding="12dp"
                 android:textColor="@color/white"
-                android:textColorHint="@color/white" />
+                android:textColorHint="@color/white"
+                android:imeOptions="actionSearch">
+            </EditText>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

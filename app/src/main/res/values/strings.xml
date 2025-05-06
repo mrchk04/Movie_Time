@@ -11,4 +11,12 @@
     <string name="explorer">Explorer</string>
     <string name="favorite">Favorite</string>
     <string name="profile">Profile</string>
+    <string name="search_results">Результати пошуку</string>
+    <string name="back">Назад</string>
+    <string name="results_for">Результати для \"%1$s\"</string>
+    <string name="no_results_found">Результатів не знайдено</string>
+    <string name="try_different_keywords">Спробуйте змінити ключові слова пошуку</string>
+    <string name="something_went_wrong">Щось пішло не так</string>
+    <string name="check_connection">Перевірте ваше підключення до інтернету і спробуйте знову</string>
+    <string name="retry">Спробувати знову</string>
 </resources>

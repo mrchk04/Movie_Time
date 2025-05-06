@@ -18,6 +18,10 @@ viewpager2 = "1.0.0"
 volley = "1.2.1"
 roomKtx = "2.7.0-alpha12"
 leakcanaryAndroid = "3.0-alpha-8"
+runner = "1.6.1"
+mockitoCore = "5.17.0"
+mockitoInline = "5.2.0"
+robolectric = "4.14.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +43,10 @@ retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref =
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanaryAndroid" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

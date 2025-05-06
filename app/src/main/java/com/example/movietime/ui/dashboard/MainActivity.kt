@@ -1,10 +1,13 @@
 package com.example.movietime.ui.dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ProgressBar
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +34,7 @@ import com.example.movietime.data.remote.dto.MovieListDto
 import com.example.movietime.data.remote.dto.PopularMoviesResponse
 import com.example.movietime.domain.usecase.CategoryListAdapter
 import com.example.movietime.domain.usecase.FilmListAdapter
+import com.example.movietime.ui.search.SearchResultActivity
 import com.google.gson.Gson
 import kotlin.math.abs
 
@@ -68,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         initView()
         banners()
+        setupSearchButton()
         fetchData<MovieDto, MovieListDto>(
             "${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1",
             loading1,
@@ -90,6 +95,9 @@ class MainActivity : AppCompatActivity() {
         ) { genres -> CategoryListAdapter(genres) }  // Передаємо адаптер
     }
 
+    open fun getRequestQueue(): RequestQueue {
+        return mRequestQueue
+    }
 
     private inline fun <reified T, reified R> fetchData(
         url: String,
@@ -118,7 +126,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    private fun banners() {
+     fun banners() {
         val url = "${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1"
 
         val requestQueue = Volley.newRequestQueue(this)
@@ -133,7 +141,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Формуємо список постерів для адаптера
                 val sliderItems = topMovies.mapNotNull { movie ->
-                    movie.backdropPath.let { backdropPath ->
+                    movie.backdrop_path.let { backdropPath ->
                         SliderItem("https://image.tmdb.org/t/p/w780${backdropPath}", movie.id)
                     }
                 }
@@ -192,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         slideHandler.postDelayed(slideRunnable, 2000)
     }
 
-    private fun initView() {
+    public fun initView() {
         viewPager2 = view.viewPager
         recyclerViewBestMovies = view.view1
         recyclerViewBestMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -203,6 +211,23 @@ class MainActivity : AppCompatActivity() {
         loading1 = view.progressBar1
         loading2 = view.progressBar2
         loading3 = view.progressBar3
+    }
+
+    private fun setupSearchButton() {
+        view.editTextText2.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val query = v.text.toString()
+                if (query.isNotEmpty()) {
+                    val intent = Intent(this, SearchResultActivity::class.java)
+                    intent.putExtra("SEARCH_QUERY", query)
+                    startActivity(intent)
+                }
+                true
+            } else {
+                false
+            }
+        }
     }
 }
 

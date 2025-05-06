@@ -30,15 +30,8 @@
         <activity
             android:name=".ui.dashboard.MainActivity"
             android:exported="false">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
         </activity>
+        <activity android:name=".ui.search.SearchResultActivity" />
     </application>
 
 </manifest>

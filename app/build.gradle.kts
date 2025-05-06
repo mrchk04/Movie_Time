@@ -1,7 +1,11 @@
+import org.gradle.internal.impldep.org.jsoup.nodes.Document.OutputSettings.Syntax.html
+import org.gradle.internal.impldep.org.jsoup.nodes.Document.OutputSettings.Syntax.xml
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id ("kotlin-kapt")
+    id ("jacoco")
 }
 
 android {
@@ -27,6 +31,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -55,9 +60,18 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.androidx.room.ktx)
     implementation (libs.hilt.android)
+    implementation(libs.mockito.core)
+    implementation(libs.mockito.inline)
+    implementation(libs.robolectric)
+    testImplementation(libs.androidx.runner)
+    testImplementation(libs.androidx.junit)
     debugImplementation(libs.leakcanary.android)
     kapt (libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+jacoco {
+    toolVersion = "0.8.7"
 }
